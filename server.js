@@ -12,8 +12,17 @@ const app = express();
 // Connect to MongoDB
 connectDB();
 
-// Middleware
-app.use(cors());
+const allowedOrigins = [
+    'http://localhost:3000',
+];
+
+app.use(cors({
+    origin: allowedOrigins,
+}));
+
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 var options = {
@@ -26,12 +35,10 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, options))
 // Routes
 const authRouter = require('./routes/authRoutes');
 const userRoutes = require("./routes/userRoutes");
-const mangaRoutes = require("./routes/mangaRoutes");
 const readingListRoutes = require("./routes/readingListRoutes");
 const commentRoutes = require("./routes/commentRoutes");
 app.use('/api/auth', authRouter);
 app.use("/api/user", userRoutes);
-app.use("/api/manga", mangaRoutes);
 app.use("/api/readingList", readingListRoutes);
 app.use("/api/comment", commentRoutes);
 

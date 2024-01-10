@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const validateUserId = (req, res, next) => {
-    const userId = req.body.userId || req.params.userId;
+    const userId = req.params.userId;
 
     if (!mongoose.Types.ObjectId.isValid(userId)) {
         return res.status(400).json({ error: 'Invalid user ID' });
@@ -20,18 +20,6 @@ const validateCommentId = (req, res, next) => {
     next();
 };
 
-const validateMangaId = (req, res, next) => {
-    const mangaId = req.body.mangaId || req.params.mangaId;
-
-    console.log(mangaId);
-    console.log(mangaId);
-
-    if (!mongoose.Types.ObjectId.isValid(mangaId)) {
-        return res.status(400).json({ error: 'Invalid manga ID' });
-    }
-
-    next();
-};
 
 const validateListId = (req, res, next) => {
     const listId = req.body.listId || req.params.listId;
@@ -43,8 +31,8 @@ const validateListId = (req, res, next) => {
     next();
 };
 
-const validateAPIMangaId = (req, res, next) => {
-    const apiMangaId = req.body.apiMangaId || req.params.apiMangaId;
+const validateMangaId = (req, res, next) => {
+    const apiMangaId = req.params.mangaId;
 
     if (typeof apiMangaId !== "string" || !apiMangaId) {
         return res.status(400).json({ message: "Invalid api manga ID" });
@@ -67,7 +55,6 @@ module.exports = {
     validateUserId,
     validateCommentId,
     validateMangaId,
-    validateAPIMangaId,
     validateListId,
     validateChapterId
 };

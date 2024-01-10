@@ -2,9 +2,10 @@ const express = require('express');
 const router = express.Router();
 
 const {
-    createReadingList,
     addNewManga,
     getReadingList,
+    getOneManga,
+    updateMangaInReadingList,
     deleteAllMangasFromReadingList,
     deleteMangaFromReadingList
 } = require('../controllers/readingListController');
@@ -12,24 +13,26 @@ const {
 const {
     validateUserId,
     validateMangaId,
-    validateListId
 } = require('../middlewares/validateInput');
 
 const authMiddleware = require('../middlewares/auth');
 
-// Create a new reading list for a user
-router.post('/', authMiddleware, validateUserId, createReadingList);
-
 // Add a new manga to a reading list
-router.post('/:listId/mangas', authMiddleware, validateListId, validateMangaId, addNewManga);
+router.post('/:userId/add-manga/:mangaId', authMiddleware, validateUserId, validateMangaId, addNewManga);
 
 // Get a reading list by ID
-router.get('/:listId', authMiddleware, validateListId, getReadingList);
+router.get('/:userId', authMiddleware, validateUserId, getReadingList);
+
+// Get one manga in reading list
+router.get('/:userId/get-manga/:mangaId', authMiddleware, validateUserId, validateMangaId, getOneManga);
+
+// Update manga in reading list
+router.put('/:userId/update-manga/:mangaId', authMiddleware, validateUserId, validateMangaId, updateMangaInReadingList);
 
 // Delete all mangas from a reading list
-router.delete('/:listId/mangas', authMiddleware, validateListId, deleteAllMangasFromReadingList);
+router.delete('/:userId', authMiddleware, validateUserId, deleteAllMangasFromReadingList);
 
 // Delete a manga from a reading list
-router.delete('/:listId/mangas/:mangaId', authMiddleware, validateListId, validateMangaId, deleteMangaFromReadingList);
+router.delete('/:userId/delete-manga/:mangaId', authMiddleware, validateUserId, validateMangaId, deleteMangaFromReadingList);
 
 module.exports = router;

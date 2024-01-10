@@ -1,49 +1,29 @@
 const ReadingList = require('../models/readingList');
-const Manga = require('../models/manga');
-
-const createReadingList = async (req, res) => {
-    const { userId } = req.body;
-
-    try {
-        // Check if the user already has a reading list
-        const existingReadingList = await ReadingList.findOne({ user_id: userId });
-        if (existingReadingList) {
-            return res.status(400).json({ success: false, message: 'User already has a reading list' });
-        }
-
-        // Create a new reading list for the user
-        const readingList = new ReadingList({ user_id: userId, mangas: [] });
-        await readingList.save();
-        res.status(201).json({ success: true, message: 'Reading list created successfully', readingList });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Failed to create reading list', error });
-    }
-};
-
 
 const addNewManga = async (req, res) => {
-    const { listId, mangaId, status } = req.body; // Assuming 'status' is passed in the request body
+
+    const { userId, mangaId } = req.params;
+    const status = req.query.status;
 
     try {
+        // Check if reading list exists for the user
+        let readingList = await ReadingList.findOne({ user: userId });
+
+        if (!readingList) {
+            // If the reading list doesn't exist, create a new reading list
+            readingList = new ReadingList({ user: userId, mangas: [] });
+        }
+
         // Check if manga already exists in reading list
-        const existingManga = await ReadingList.findOne({ _id: listId, mangas: mangaId });
+        const existingManga = readingList.mangas.find((m) => m.manga === mangaId);
+
         if (existingManga) {
             return res.status(400).json({ success: false, message: 'Manga already exists in reading list' });
         }
 
-        // Check if manga exists
-        const manga = await Manga.findById(mangaId);
-        if (!manga) {
-            return res.status(404).json({ success: false, message: 'Manga not found' });
-        }
-
         // Add manga to reading list with status
-        const readingList = await ReadingList.findOneAndUpdate(
-            { _id: listId },
-            { $push: { mangas: { manga: mangaId, status: status } } }, // Include status in the array
-            { upsert: true, new: true }
-        );
+        readingList.mangas.push({ manga: mangaId, status: status });
+        await readingList.save();
 
         res.status(200).json({ success: true, message: 'Manga added to reading list', readingList });
     } catch (error) {
@@ -52,13 +32,11 @@ const addNewManga = async (req, res) => {
     }
 };
 
-
-
 const getReadingList = async (req, res) => {
-    const { listId } = req.params;
+    const { userId } = req.params;
 
     try {
-        const readingList = await ReadingList.findOne({ _id: listId }).populate('mangas');
+        const readingList = await ReadingList.findOne({ user: userId }).populate('mangas');
         if (!readingList) {
             return res.status(404).json({ success: false, message: 'Reading list not found' });
         }
@@ -69,12 +47,66 @@ const getReadingList = async (req, res) => {
     }
 };
 
-const deleteAllMangasFromReadingList = async (req, res) => {
-    const { listId } = req.params;
+const getOneManga = async (req, res) => {
+    const { userId, mangaId } = req.params;
+
+    try {
+        // Find the reading list for the user
+        const readingList = await ReadingList.findOne({ user: userId });
+
+        if (!readingList) {
+            return res.status(404).json({ success: false, message: 'Reading list not found' });
+        }
+
+        // Find the manga in the reading list
+        const mangaInList = readingList.mangas.find((m) => m.manga === mangaId);
+
+        if (!mangaInList) {
+            return res.status(404).json({ success: false, message: 'Manga not found in reading list' });
+        }
+
+        // Here you can fetch additional details about the manga using the mangaId
+
+        // Return the manga details along with the status
+        res.status(200).json({
+            success: true,
+            message: 'Manga details retrieved successfully',
+            manga: mangaInList,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Failed to get manga details', error });
+    }
+};
+
+const updateMangaInReadingList = async (req, res) => {
+    const { userId, mangaId } = req.params;
+    const status = req.query.status;;
 
     try {
         const readingList = await ReadingList.findOneAndUpdate(
-            { _id: listId },
+            { user: userId, 'mangas.manga': mangaId },
+            { $set: { 'mangas.$.status': status } },
+            { new: true }
+        ).populate('mangas');
+
+        if (!readingList) {
+            return res.status(404).json({ success: false, message: 'Reading list or manga not found' });
+        }
+
+        res.status(200).json({ success: true, message: 'Manga in reading list updated successfully', readingList });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Failed to update manga in reading list', error });
+    }
+};
+
+const deleteAllMangasFromReadingList = async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const readingList = await ReadingList.findOneAndUpdate(
+            { user: userId },
             { $set: { mangas: [] } },
             { new: true }
         );
@@ -86,14 +118,19 @@ const deleteAllMangasFromReadingList = async (req, res) => {
 };
 
 const deleteMangaFromReadingList = async (req, res) => {
-    const { listId, mangaId } = req.params;
+    const { userId, mangaId } = req.params;
 
     try {
         const readingList = await ReadingList.findOneAndUpdate(
-            { _id: listId },
-            { $pull: { mangas: mangaId } },
+            { user: userId },
+            { $pull: { mangas: { manga: mangaId } } },
             { new: true }
         ).populate('mangas');
+
+        if (!readingList) {
+            return res.status(404).json({ success: false, message: 'Reading list or manga not found' });
+        }
+
         res.status(200).json({ success: true, message: 'Manga deleted from reading list', readingList });
     } catch (error) {
         console.error(error);
@@ -101,4 +138,5 @@ const deleteMangaFromReadingList = async (req, res) => {
     }
 };
 
-module.exports = { createReadingList, addNewManga, getReadingList, deleteAllMangasFromReadingList, deleteMangaFromReadingList };
+
+module.exports = { addNewManga, getReadingList, getOneManga, updateMangaInReadingList, deleteAllMangasFromReadingList, deleteMangaFromReadingList };

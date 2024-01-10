@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
 
 const ReadingListSchema = new mongoose.Schema({
-    user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     mangas: [{
-        manga: { type: mongoose.Schema.Types.ObjectId, ref: 'Manga' },
-        status: { type: String } // Add the 'status' field here
+        manga: { type: String, required: true },
+        status: { type: String },
+        created_at: { type: Date, default: Date.now }
     }]
 });
 

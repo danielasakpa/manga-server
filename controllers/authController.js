@@ -17,9 +17,17 @@ const login = async (req, res) => {
             return res.status(401).json({ message: 'Authentication failed' });
         }
         // Create and sign a JWT token
-        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '2d' });
         // Return success response with the token
-        res.json({ message: 'Authentication successful', token });
+        res.json({
+            message: 'Authentication successful',
+            token,
+            user: {
+                _id: user._id,
+                username: user.username,
+                email: user.email
+            }
+        });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

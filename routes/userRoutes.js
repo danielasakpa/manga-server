@@ -8,15 +8,15 @@ const { validateUserId } = require('../middlewares/validateInput');
 router.get('/', authMiddleware, getAllUsers);
 
 // Get one user (requires authentication)
-router.get('/:id', authMiddleware, validateUserId, getOneUser);
+router.get('/:userId', authMiddleware, validateUserId, getOneUser);
 
 // Create a user (no authentication required)
 router.post('/', createUser);
 
 // Update a user (requires authentication)
-router.patch('/:id', authMiddleware, validateUserId, updateUser);
+router.put('/:userId', authMiddleware, validateUserId, updateUser);
 
 // Delete a user (requires authentication)
-router.delete('/:id', authMiddleware, validateUserId, deleteUser);
+router.delete('/:userId', authMiddleware, validateUserId, deleteUser);
 
 module.exports = router;
