@@ -13,6 +13,7 @@ const app = express();
 connectDB();
 
 const allowedOrigins = [
+    'https://manga-website1.netlify.app',
     'http://localhost:3000',
 ];
 
