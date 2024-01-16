@@ -18,7 +18,11 @@ const getOneUser = async (req, res) => {
         if (!user) {
             return res.status(404).json({ error: 'User Not Found', message: 'User with the given ID not found' });
         }
-        res.json(user);
+        res.json({
+            _id: user._id,
+            username: user.username,
+            email: user.email
+        });
     } catch (err) {
         res.status(500).json({ error: 'Internal Server Error', message: err.message });
     }
@@ -39,7 +43,7 @@ const createUser = async (req, res) => {
             password: hashedPassword,
         });
         await user.save();
-        res.status(201).json(user);
+        res.status(204);
     } catch (err) {
         res.status(400).json({ error: 'Bad Request', message: err.message });
     }
@@ -63,7 +67,7 @@ const updateUser = async (req, res) => {
 
         const user = await User.findByIdAndUpdate(req.params.userId, updatedUser, { new: true });
 
-        res.json({
+        res.status(200).json({
             _id: user._id,
             username: user.username,
             email: user.email
@@ -81,7 +85,7 @@ const deleteUser = async (req, res) => {
         if (!user) {
             return res.status(404).json({ error: 'User Not Found', message: 'User with the given ID not found' });
         }
-        res.json(user);
+        res.status(204);
     } catch (err) {
         res.status(500).json({ error: 'Internal Server Error', message: err.message });
     }

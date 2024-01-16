@@ -35,22 +35,6 @@ const addNewManga = async (req, res) => {
     }
 };
 
-// const getReadingList = async (req, res) => {
-//     const { userId } = req.params;
-
-//     try {
-//         const readingList = await ReadingList.findOne({ user: userId }).populate('mangas');
-//         if (!readingList) {
-//             return res.status(404).json({ success: false, message: 'Reading list not found' });
-//         }
-//         res.status(200).json({ success: true, message: 'Reading list retrieved successfully', readingList });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ success: false, message: 'Failed to retrieve reading list', error });
-//     }
-// };
-
-
 const getReadingList = async (req, res) => {
     const { userId } = req.params;
 
