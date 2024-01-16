@@ -2,7 +2,6 @@ const ReadingList = require('../models/readingList');
 const cache = require('memory-cache'); // Install using npm install memory-cache
 
 const addNewManga = async (req, res) => {
-
     const { userId, mangaId } = req.params;
     const status = req.query.status;
 
@@ -16,7 +15,7 @@ const addNewManga = async (req, res) => {
         }
 
         // Check if manga already exists in reading list
-        const existingManga = readingList.mangas.find((m) => m.manga === mangaId);
+        const existingManga = readingList.mangas.find((m) => m.manga.toString() === mangaId);
 
         if (existingManga) {
             return res.status(400).json({ success: false, message: 'Manga already exists in reading list' });
@@ -24,16 +23,23 @@ const addNewManga = async (req, res) => {
 
         // Add manga to reading list with status
         readingList.mangas.push({ manga: mangaId, status: status });
+
+        // Save the reading list
         await readingList.save();
 
+        // Fetch the added manga from the list
+        const addedManga = readingList.mangas.find((m) => m.manga.toString() === mangaId);
+
+        // Clear cache (if you're using caching)
         cache.del(userId);
 
-        res.status(200).json({ success: true, message: 'Manga added to reading list', readingList });
+        res.status(200).json({ success: true, message: 'Manga added to reading list', manga: addedManga });
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: 'Failed to add manga to reading list', error });
     }
 };
+
 
 const getReadingList = async (req, res) => {
     const { userId } = req.params;
@@ -118,7 +124,9 @@ const updateMangaInReadingList = async (req, res) => {
 
         cache.del(userId);
 
-        res.status(200).json({ success: true, message: 'Manga in reading list updated successfully', readingList });
+        const updatedManga = readingList.mangas.find((m) => m.manga.toString() === mangaId);
+
+        res.status(200).json({ success: true, message: 'Manga in reading list updated successfully', manga: updatedManga });
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: 'Failed to update manga in reading list', error });
@@ -134,7 +142,7 @@ const deleteAllMangasFromReadingList = async (req, res) => {
             { $set: { mangas: [] } },
             { new: true }
         );
-        res.status(200).json({ success: true, message: 'All mangas deleted from reading list', readingList });
+        res.status(204);
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: 'Failed to delete all mangas from reading list', error });
@@ -155,7 +163,7 @@ const deleteMangaFromReadingList = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Reading list or manga not found' });
         }
 
-        res.status(200).json({ success: true, message: 'Manga deleted from reading list', readingList });
+        res.status(204);
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: 'Failed to delete manga from reading list', error });
