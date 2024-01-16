@@ -5,13 +5,27 @@ const connectDB = async () => {
     try {
         await mongoose.connect(MONGO_URI, {
             useNewUrlParser: true,
-            useUnifiedTopology: true
+            useUnifiedTopology: true,
+            maxPoolSize: 50,
+            wtimeoutMS: 2500,
         });
-        console.log('MongoDB connected');
     } catch (error) {
-        console.error(error);
-        process.exit(1);
+        console.error('MongoDB connection error:', error);
+        // Retry connection or handle gracefully based on your requirements
     }
 };
+
+mongoose.connection.on('connected', () => {
+    console.log('MongoDB connected');
+});
+
+mongoose.connection.on('error', (err) => {
+    console.error('MongoDB connection error:', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+    console.log('MongoDB disconnected');
+});
+
 
 module.exports = connectDB;

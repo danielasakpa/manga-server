@@ -5,7 +5,7 @@ require('dotenv').config();
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swagger.json');
 const connectDB = require('./utils/db');
-const router = express.Router();
+const compression = require('compression');
 
 const app = express();
 
@@ -21,6 +21,7 @@ app.use(cors({
     origin: allowedOrigins,
 }));
 
+app.use(compression()); // Enable compression
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

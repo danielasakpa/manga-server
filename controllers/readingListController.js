@@ -1,4 +1,5 @@
 const ReadingList = require('../models/readingList');
+const cache = require('memory-cache'); // Install using npm install memory-cache
 
 const addNewManga = async (req, res) => {
 
@@ -25,6 +26,8 @@ const addNewManga = async (req, res) => {
         readingList.mangas.push({ manga: mangaId, status: status });
         await readingList.save();
 
+        cache.del(userId);
+
         res.status(200).json({ success: true, message: 'Manga added to reading list', readingList });
     } catch (error) {
         console.error(error);
@@ -32,20 +35,54 @@ const addNewManga = async (req, res) => {
     }
 };
 
+// const getReadingList = async (req, res) => {
+//     const { userId } = req.params;
+
+//     try {
+//         const readingList = await ReadingList.findOne({ user: userId }).populate('mangas');
+//         if (!readingList) {
+//             return res.status(404).json({ success: false, message: 'Reading list not found' });
+//         }
+//         res.status(200).json({ success: true, message: 'Reading list retrieved successfully', readingList });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ success: false, message: 'Failed to retrieve reading list', error });
+//     }
+// };
+
+
 const getReadingList = async (req, res) => {
     const { userId } = req.params;
 
+    // Check if the reading list is in the cache
+    const cachedReadingList = cache.get(userId);
+    if (cachedReadingList) {
+        // If found in cache, return cached data
+        return res.status(200).json({
+            success: true,
+            message: 'Reading list retrieved successfully',
+            readingList: cachedReadingList,
+        });
+    }
+
     try {
+        // If not in cache, fetch from the database
         const readingList = await ReadingList.findOne({ user: userId }).populate('mangas');
-        if (!readingList) {
+
+        if (!readingList || readingList.length === 0) {
             return res.status(404).json({ success: false, message: 'Reading list not found' });
         }
-        res.status(200).json({ success: true, message: 'Reading list retrieved successfully', readingList });
+
+        // Store in cache for future requests
+        cache.put(userId, readingList, 60000); // Cache for 1 minute
+
+        res.status(200).json({ success: true, message: 'Reading list retrieved successfully', readingList: readingList });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false, message: 'Failed to retrieve reading list', error });
+        res.status(500).json({ success: false, message: 'Failed to retrieve reading list', error: error.message });
     }
 };
+
 
 const getOneManga = async (req, res) => {
     const { userId, mangaId } = req.params;
@@ -65,7 +102,8 @@ const getOneManga = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Manga not found in reading list' });
         }
 
-        // Here you can fetch additional details about the manga using the mangaId
+
+        cache.del(userId);
 
         // Return the manga details along with the status
         res.status(200).json({
@@ -93,6 +131,8 @@ const updateMangaInReadingList = async (req, res) => {
         if (!readingList) {
             return res.status(404).json({ success: false, message: 'Reading list or manga not found' });
         }
+
+        cache.del(userId);
 
         res.status(200).json({ success: true, message: 'Manga in reading list updated successfully', readingList });
     } catch (error) {
