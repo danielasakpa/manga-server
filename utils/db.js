@@ -7,11 +7,11 @@ const connectDB = async () => {
             useNewUrlParser: true,
             useUnifiedTopology: true,
             maxPoolSize: 50,
-            wtimeoutMS: 2500,
+            wtimeoutMS: 5000,
         });
     } catch (error) {
         console.error('MongoDB connection error:', error);
-        // Retry connection or handle gracefully based on your requirements
+        setTimeout(connectDB, 5000);
     }
 };
 

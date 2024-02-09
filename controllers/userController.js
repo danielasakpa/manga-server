@@ -36,14 +36,15 @@ const createUser = async (req, res) => {
             return res.status(400).json({ error: 'Bad Request', message: 'Email is already in use' });
         }
 
-        const hashedPassword = await bcrypt.hash(req.body.password, 10);
+        const hashedPassword = await bcrypt.hash(req.body.password, 8);
         const user = new User({
             username: req.body.username,
             email: req.body.email,
             password: hashedPassword,
         });
-        await user.save();
-        res.status(204);
+
+        user.save();
+        res.status(204).send();;
     } catch (err) {
         res.status(400).json({ error: 'Bad Request', message: err.message });
     }
