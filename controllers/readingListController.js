@@ -163,7 +163,7 @@ const deleteMangaFromReadingList = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Reading list or manga not found' });
         }
 
-        res.status(204);
+        res.status(204).send();
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: 'Failed to delete manga from reading list', error });
