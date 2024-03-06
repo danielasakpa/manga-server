@@ -6,6 +6,7 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swagger.json');
 const connectDB = require('./utils/db');
 const compression = require('compression');
+const passport = require("passport");
 
 const app = express();
 
@@ -16,6 +17,8 @@ const allowedOrigins = ['https://manga-website1.netlify.app', 'http://localhost:
 
 app.use(cors({
     origin: allowedOrigins,
+    methods: "GET,POST,PUT,DELETE",
+    credentials: true,
 }));
 
 app.use(compression()); // Enable compression
@@ -23,6 +26,8 @@ app.use(compression()); // Enable compression
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+app.use(passport.initialize());
 
 var options = {
     explorer: true
