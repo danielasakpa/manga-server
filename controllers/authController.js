@@ -54,9 +54,9 @@ const googleAuthCallback = async (req, res, next) => {
                     token,
                     userId: user._id
                 };
-                11
+                
                 // Set the authData object as an HTTP-only cookie
-                res.cookie('auth_data', authData, { secure: true });
+                res.cookie('auth_data', authData);
 
                 // Redirect the user to the React app
                 res.redirect(`${process.env.CLIENT_URL}`);
