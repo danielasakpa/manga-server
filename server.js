@@ -21,6 +21,17 @@ app.use(cors({
     credentials: true,
 }));
 
+app.use(function(req, res, next) {
+    res.header('Content-Type', 'application/json;charset=UTF-8')
+    res.header('Access-Control-Allow-Credentials', true)
+    res.header(
+      'Access-Control-Allow-Headers',
+      'Origin, X-Requested-With, Content-Type, Accept'
+    )
+    next()
+  })
+  
+
 app.use(compression()); // Enable compression
 
 app.use(express.json());
