@@ -16,8 +16,9 @@ router.get("/logout", logout);
 router.get('/google', googleAuth);
 
 router.get('/google/callback', passport.authenticate("google", {
-    successRedirect: process.env.CLIENT_URL,
+    successRedirect: "https://manga-server-luxr.onrender.com/api/auth/login/success",
     failureRedirect: "/login/failed",
+    failureFlash: true
 }));
 
 module.exports = router;
