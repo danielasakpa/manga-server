@@ -26,7 +26,7 @@ const app = express();
 // Connect to MongoDB
 connectDB();
 
-app.set('trust proxy', true);
+app.set('trust proxy', 1);
 
 const allowedOrigins = ['https://manga-website1.netlify.app', 'https://manga-website-odjt.onrender.com', 'http://localhost:3000'];
 
@@ -51,11 +51,12 @@ app.use(bodyParser.json());
 app.use(session({
   secret: "the_one_piece_is_real",
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
   store: new MongoStore({
     mongoUrl: process.env.MONGO_URI,
   }),
   cookie: {
+    sameSite: 'none',
     secure: true,
     maxAge: 24 * 60 * 60 * 1000
   },
