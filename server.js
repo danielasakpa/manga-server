@@ -55,10 +55,6 @@ app.use(session({
   store: new MongoStore({
     mongoUrl: process.env.MONGO_URI,
   }),
-  cookie: {
-    sameSite: 'none',
-    secure: true,
-  },
 }));
 
 
