@@ -48,8 +48,6 @@ app.use(bodyParser.json());
 
 app.use(
   cookieSession({
-    domain: 'manga-website-odjt.onrender.com',
-    secure: process.env.NODE_ENV === 'production',
     name: "session",
     keys: ["yuki"],
     maxAge: 24 * 60 * 60 * 1000,
