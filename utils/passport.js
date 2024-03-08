@@ -37,24 +37,18 @@ passport.use(new GoogleStrategy({
     }
 ));
 
-
+// Serialize and deserialize the user for session management
 passport.serializeUser((user, done) => {
-    done(null, user);
+    done(null, user.id);
 });
-
-passport.deserializeUser((user, done) => {
-    done(null, user);
+passport.deserializeUser(async (id, done) => {
+    try {
+        const user = await User.findById(id);
+        if (!user) {
+            return done(null, false);
+        }
+        return done(null, user);
+    } catch (err) {
+        return done(err, false);
+    }
 });
-
-// passport.serializeUser((user, done) => {
-//     done(null, user.id); // Store the user ID in the session
-//   });
-  
-//   passport.deserializeUser(async (id, done) => {
-//     try {
-//       const user = await User.findById(id);
-//       done(null, user); // Retrieve the user from the database using the stored ID
-//     } catch (err) {
-//       done(err);
-//     }
-//   });
