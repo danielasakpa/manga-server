@@ -3,23 +3,6 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
 
-const googleAuthCallback = async (req, res, next) => {
-    passport.authenticate('google', { failureRedirect: `${process.env.CLIENT_URL}login` }, async (error, user, info) => {
-        if (error) {
-            return res.send({ message: error.message });
-        }
-        if (user) {
-            try {
-                // Redirect the user to the React app
-                res.redirect(`${process.env.CLIENT_URL}`);
-            } catch (error) {
-                // error msg 
-                return res.send({ message: error.message });
-            }
-        }
-    })(req, res, next);
-}
-
 const passportLogin = (req, res) => {
     if (req.user) {
 
@@ -83,6 +66,5 @@ const logout = (req, res) => {
 module.exports = {
     login,
     logout,
-    passportLogin,
-    googleAuthCallback
+    passportLogin
 };
