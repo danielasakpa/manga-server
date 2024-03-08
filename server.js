@@ -56,8 +56,9 @@ app.use(bodyParser.json());
 
 app.use(
   cookieSession({
+    domain: ".onrender.com",
     secure: true,
-    sameSite: "none",
+    sameSite: "Strict",
     httpOnly: true,
     name: "session",
     keys: [`${process.env.SESSION_SECRET}`],
