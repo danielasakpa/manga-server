@@ -48,14 +48,13 @@ app.use(bodyParser.json());
 
 app.use(
   cookieSession({
-    sameSite: 'Lax',
+    domain: 'manga-website-odjt.onrender.com',
     secure: process.env.NODE_ENV === 'production',
     name: "session",
     keys: ["yuki"],
     maxAge: 24 * 60 * 60 * 1000,
   })
 );
-
 app.use(passport.initialize());
 app.use(passport.session());
 
