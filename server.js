@@ -3,13 +3,12 @@ const express = require("express");
 const bodyParser = require("body-parser");
 
 // Third-party Modules
-// const cookieSession = require("cookie-session");
+const cookieSession = require("cookie-session");
 const cors = require("cors");
 const swaggerUi = require('swagger-ui-express');
-const session = require('express-session');
+// const session = require('express-session');
 const compression = require('compression');
 const passport = require("passport");
-const MongoStore = require('connect-mongo');
 
 // Environment Configuration
 require('dotenv').config();
@@ -41,36 +40,30 @@ app.use(cors({
   credentials: true,
 }));
 
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", process.env.CLIENT_URL);
+  res.setHeader("Access-Control-Allow-Credentials", true);
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
+  next();
+});
+
 app.use(compression());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// app.use(
-//   cookieSession({
-//     name: "session",
-//     keys: ["yuki"],
-//     maxAge: 24 * 60 * 60 * 1000,
-//   })
-// );
-
-const sessionOptions = {
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: true, // required for cookies to work on HTTPS
-    httpOnly: false,
-    sameSite: 'none',
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
-  },
-  store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
-};
-
-
-app.use(session(sessionOptions));
-
+app.use(
+  cookieSession({
+    secure: true,
+    sameSite: "none",
+    httpOnly: true,
+    name: "session",
+    keys: [`${process.env.SESSION_SECRET}`],
+    maxAge: 24 * 60 * 60 * 1000,
+  })
+);
 app.use(passport.initialize());
 app.use(passport.session());
 
