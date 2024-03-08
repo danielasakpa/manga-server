@@ -3,10 +3,11 @@ const express = require("express");
 const bodyParser = require("body-parser");
 
 // Third-party Modules
-const cookieSession = require("cookie-session");
+// const cookieSession = require("cookie-session");
 const cors = require("cors");
 const swaggerUi = require('swagger-ui-express');
-// const session = require('express-session');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const compression = require('compression');
 const passport = require("passport");
 
@@ -25,7 +26,7 @@ const app = express();
 // Connect to MongoDB
 connectDB();
 
-app.set('trust proxy', 1)
+app.set('trust proxy', true);
 
 const allowedOrigins = ['https://manga-website1.netlify.app', 'https://manga-website-odjt.onrender.com', 'http://localhost:3000'];
 
@@ -40,31 +41,28 @@ app.use(cors({
   credentials: true,
 }));
 
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", process.env.CLIENT_URL);
-  res.setHeader("Access-Control-Allow-Credentials", true);
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
-  next();
-});
-
 app.use(compression());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.use(
-  cookieSession({
-    domain: "onrender.com",
+// Set up session middleware
+app.use(session({
+  secret: "the_one_piece_is_real",
+  resave: false,
+  saveUninitialized: true,
+  store: new MongoStore({
+    mongoUrl: process.env.MONGO_URI,
+    ttl: 24 * 60 * 60 * 1000,
+  }),
+  cookie: {
+    sameSite: 'none',
     secure: true,
-    sameSite: "none",
-    httpOnly: true,
-    name: "session",
-    keys: [`${process.env.SESSION_SECRET}`],
-    maxAge: 24 * 60 * 60 * 1000,
-  })
-);
+  },
+}));
+
+
 app.use(passport.initialize());
 app.use(passport.session());
 
