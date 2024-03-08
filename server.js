@@ -25,6 +25,8 @@ const app = express();
 // Connect to MongoDB
 connectDB();
 
+app.set('trust proxy', 1)
+
 const allowedOrigins = ['https://manga-website1.netlify.app', 'http://localhost:3000'];
 
 app.use(cors({
@@ -45,7 +47,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.use(
-  cookieSession({ name: "session", keys: ["yuki"], maxAge: 24 * 60 * 60 * 100 })
+  cookieSession({
+    path: "/",
+    domain: 'manga-website1.netlify.app',
+    sameSite: 'Lax',
+    secure: process.env.NODE_ENV === 'production',
+    name: "session",
+    keys: ["yuki"],
+    maxAge: 24 * 60 * 60 * 1000,
+  })
 );
 
 app.use(passport.initialize());
