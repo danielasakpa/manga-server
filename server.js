@@ -55,6 +55,12 @@ app.use(session({
   store: new MongoStore({
     mongoUrl: process.env.MONGO_URI,
   }),
+  cookie: {
+    sameSite: 'Lax',
+    httpOnly: false,
+    secure: true,
+    maxAge: 24 * 60 * 60 * 1000
+  },
 }));
 
 
