@@ -56,7 +56,6 @@ app.use(session({
     mongoUrl: process.env.MONGO_URI,
   }),
   cookie: {
-    sameSite: 'Lax',
     secure: true,
     maxAge: 24 * 60 * 60 * 1000
   },
