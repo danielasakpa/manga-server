@@ -38,10 +38,23 @@ passport.use(new GoogleStrategy({
 ));
 
 
-passport.serializeUser((user, done) => {
-    done(null, user);
-});
+// passport.serializeUser((user, done) => {
+//     done(null, user);
+// });
 
-passport.deserializeUser((user, done) => {
-    done(null, user);
-});
+// passport.deserializeUser((user, done) => {
+//     done(null, user);
+// });
+
+passport.serializeUser((user, done) => {
+    done(null, user.id); // Store the user ID in the session
+  });
+  
+  passport.deserializeUser(async (id, done) => {
+    try {
+      const user = await User.findById(id);
+      done(null, user); // Retrieve the user from the database using the stored ID
+    } catch (err) {
+      done(err);
+    }
+  });
