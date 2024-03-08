@@ -46,13 +46,30 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.use(
-  cookieSession({
-    name: "session",
-    keys: ["yuki"],
-    maxAge: 24 * 60 * 60 * 1000,
-  })
-);
+// app.use(
+//   cookieSession({
+//     name: "session",
+//     keys: ["yuki"],
+//     maxAge: 24 * 60 * 60 * 1000,
+//   })
+// );
+
+const sessionOptions = {
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: true, // required for cookies to work on HTTPS
+    httpOnly: false,
+    sameSite: 'none',
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+  },
+  store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
+};
+
+
+app.use(session(sessionOptions));
+
 app.use(passport.initialize());
 app.use(passport.session());
 
