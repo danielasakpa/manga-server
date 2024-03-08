@@ -9,6 +9,7 @@ const swaggerUi = require('swagger-ui-express');
 const session = require('express-session');
 const compression = require('compression');
 const passport = require("passport");
+const MongoStore = require('connect-mongo');
 
 // Environment Configuration
 require('dotenv').config();
