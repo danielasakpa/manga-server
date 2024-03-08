@@ -2,62 +2,14 @@ const User = require('../models/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-
-// Configure Passport.js with Google OAuth2.0
-passport.use(new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: 'https://manga-server-luxr.onrender.com/api/auth/google/callback'
-},
-    async function (accessToken, refreshToken, profile, done) {
-        try {
-            // Here you can save the user's information to your database
-            const userEmail = profile.emails[0].value;
-
-            // Find the user by email
-            let user = await User.findOne({ email: userEmail });
-
-            if (user) {
-                // User already exists, just return the user
-                return done(null, user);
-            } else {
-                // Create a new user
-                const newUser = new User({
-                    username: profile.displayName,
-                    email: userEmail,
-                    password: profile.id
-                });
-
-                // Save the new user and return it
-                user = await newUser.save();
-                return done(null, user);
-            }
-        } catch (err) {
-            return done(err);
-        }
-    }
-));
-
 
 const googleAuthCallback = async (req, res, next) => {
-    passport.authenticate('google', { failureRedirect: `${process.env.CLIENT_URL}/login`, session: false }, async (error, user, info) => {
+    passport.authenticate('google', { failureRedirect: `${process.env.CLIENT_URL}login` }, async (error, user, info) => {
         if (error) {
             return res.send({ message: error.message });
         }
         if (user) {
             try {
-                const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
-
-                /// Create an object with the token and user ID
-                const authData = {
-                    token,
-                    userId: user._id
-                };
-                
-                // Set the authData object as an HTTP-only cookie
-                res.cookie('auth_data', authData);
-
                 // Redirect the user to the React app
                 res.redirect(`${process.env.CLIENT_URL}`);
             } catch (error) {
@@ -66,6 +18,31 @@ const googleAuthCallback = async (req, res, next) => {
             }
         }
     })(req, res, next);
+}
+
+const passportLogin = (req, res) => {
+    if (req.user) {
+
+        const token = jwt.sign({ userId: req.user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+
+        /// Create an object with the token and user ID
+        const authData = {
+            token,
+            userId: req.user._id
+        };
+
+        // Set the cookie options
+        const cookieOptions = {
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 24 * 60 * 60 * 1000
+        };
+
+        // Set the authData object as an HTTP-only cookie
+        res.cookie('auth_data', authData, cookieOptions);
+        res.json({
+            message: "Authentication successful"
+        })
+    }
 }
 
 
@@ -97,7 +74,15 @@ const login = async (req, res) => {
     }
 };
 
+const logout = (req, res) => {
+    req.session = null
+    req.logout();
+    res.redirect(`${process.env.CLIENT_URL}login`);
+}
+
 module.exports = {
     login,
+    logout,
+    passportLogin,
     googleAuthCallback
 };
