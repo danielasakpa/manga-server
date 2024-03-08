@@ -27,7 +27,7 @@ connectDB();
 
 app.set('trust proxy', 1)
 
-const allowedOrigins = ['https://manga-website1.netlify.app', 'http://localhost:3000'];
+const allowedOrigins = ['https://manga-website1.netlify.app', 'https://manga-website-odjt.onrender.com', 'http://localhost:3000'];
 
 app.use(cors({
   origin: function (origin, callback) {
@@ -48,8 +48,6 @@ app.use(bodyParser.json());
 
 app.use(
   cookieSession({
-    path: "/",
-    domain: 'manga-website1.netlify.app',
     sameSite: 'Lax',
     secure: process.env.NODE_ENV === 'production',
     name: "session",
