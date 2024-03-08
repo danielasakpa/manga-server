@@ -54,7 +54,6 @@ app.use(session({
   saveUninitialized: true,
   store: new MongoStore({
     mongoUrl: process.env.MONGO_URI,
-    ttl: 24 * 60 * 60 * 1000,
   }),
   cookie: {
     sameSite: 'none',
