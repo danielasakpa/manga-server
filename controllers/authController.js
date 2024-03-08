@@ -11,7 +11,8 @@ const passportLogin = (req, res) => {
         /// Create an object with the token and user ID
         const authData = {
             token,
-            userId: req.user._id
+            userId: req.user._id,
+            message: "Authentication successful"
         };
 
         // Set the cookie options
@@ -22,9 +23,7 @@ const passportLogin = (req, res) => {
 
         // Set the authData object as an HTTP-only cookie
         res.cookie('auth_data', authData, cookieOptions);
-        res.json({
-            message: "Authentication successful"
-        })
+        res.redirect(`${process.env.CLIENT_URL}`)
     }
 }
 
@@ -58,10 +57,26 @@ const login = async (req, res) => {
 };
 
 const logout = (req, res) => {
-    req.session = null
-    req.logout();
-    res.redirect(`${process.env.CLIENT_URL}login`);
-}
+    // Check if the user is authenticated
+    if (req.isAuthenticated()) {
+        // Perform user logout
+        req.logout((err) => {
+            if (err) {
+                // Handle logout error
+                return res.status(500).json({ success: false, msg: "Logout failed.", error: err });
+            }
+            // Redirect to the login page after successful logout
+            return res.redirect(`${process.env.CLIENT_URL}login`);
+        });
+    } else {
+        // User is already logged out
+        return res.json({
+            success: false,
+            error: "User already logged out"
+        });
+    }
+};
+
 
 module.exports = {
     login,
