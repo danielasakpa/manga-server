@@ -1,47 +1,59 @@
+// Core Modules
 const express = require("express");
-const cors = require("cors");
 const bodyParser = require("body-parser");
-require('dotenv').config();
+
+// Third-party Modules
+const cookieSession = require("cookie-session");
+const cors = require("cors");
 const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('./swagger.json');
-const connectDB = require('./utils/db');
+// const session = require('express-session');
 const compression = require('compression');
 const passport = require("passport");
+
+// Environment Configuration
+require('dotenv').config();
+
+// Custom Modules
+const connectDB = require('./utils/db');
+require("./utils/passport");
+
+// Swagger Documentation
+const swaggerDocument = require('./swagger.json');
 
 const app = express();
 
 // Connect to MongoDB
 connectDB();
 
-const allowedOrigins = ['https://manga-website1.netlify.app', 'http://localhost:3000', 'https://localhost:3000'];
+const allowedOrigins = ['https://manga-website1.netlify.app', 'http://localhost:3000'];
 
 app.use(cors({
-    origin: allowedOrigins,
-    methods: "GET,POST,PUT,DELETE",
-    credentials: true,
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
 }));
 
-app.use(function(req, res, next) {
-    res.header('Content-Type', 'application/json;charset=UTF-8')
-    res.header('Access-Control-Allow-Credentials', true)
-    res.header(
-      'Access-Control-Allow-Headers',
-      'Origin, X-Requested-With, Content-Type, Accept'
-    )
-    next()
-  })
-  
-
-app.use(compression()); // Enable compression
+app.use(compression());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+app.use(
+  cookieSession({ name: "session", keys: ["yuki"], maxAge: 24 * 60 * 60 * 100 })
+);
+
 app.use(passport.initialize());
+app.use(passport.session());
+
 
 var options = {
-    explorer: true
+  explorer: true
 };
 
 // Swagger UI
