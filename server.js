@@ -32,7 +32,7 @@ const swaggerDocument = require('./swagger.json');
 // Connect to MongoDB
 connectDB();
 
-app.set('trust proxy', true);
+app.set('trust proxy', 1);
 
 const allowedOrigins = ['https://manga-website1.netlify.app', 'https://manga-website-odjt.onrender.com', 'http://localhost:3000'];
 
@@ -54,17 +54,18 @@ app.use(session({
   saveUninitialized: false,
   store: MongoStore.create({
     mongoUrl: process.env.MONGO_URI,
-    ttl: 14 * 24 * 60 * 60,
-    autoRemove: 'native',
-    collectionName: 'sessions',
-    mongoOptions: {
-      useUnifiedTopology: true,
-    }
+    // ttl: 14 * 24 * 60 * 60,
+    // autoRemove: 'native',
+    // collectionName: 'sessions',
+    // mongoOptions: {
+    //   useUnifiedTopology: true,
+    // }
   }),
   cookie: {
     sameSite: 'none',
     secure: true,
-    maxAge: 24 * 60 * 60 * 1000
+    httpOnly: true,
+    expires: 24 * 60 * 60 * 1000
   },
 }));
 
