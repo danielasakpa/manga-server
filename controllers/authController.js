@@ -18,6 +18,7 @@ const passportLogin = (req, res) => {
         // Set the cookie options
         const cookieOptions = {
             secure: true,
+            domain: "manga-website1.netlify.app",
             sameSite: 'none',
             httpOnly: true,
             maxAge: 24 * 60 * 60 * 1000
