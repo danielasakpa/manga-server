@@ -11,13 +11,14 @@ const passportLogin = (req, res) => {
         /// Create an object with the token and user ID
         const authData = {
             token,
-            userId: req.user._id,
+            user: req.user,
             message: "Authentication successful"
         };
 
         // Set the cookie options
         const cookieOptions = {
             secure: true,
+            sameSite: 'none',
             httpOnly: true,
             maxAge: 24 * 60 * 60 * 1000
         };
@@ -48,7 +49,7 @@ const login = async (req, res) => {
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
         // Return success response with the token
         res.json({
-            userId: user._id,
+            user: user,
             message: 'Authentication successful',
             token
         });
