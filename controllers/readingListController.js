@@ -5,6 +5,12 @@ const addNewManga = async (req, res) => {
     const { userId, mangaId } = req.params;
     const status = req.query.status;
 
+    const {
+        title,
+        manga_status,
+        statistics,
+    } = req.body; // Extract from request body
+
     try {
         // Check if reading list exists for the user
         let readingList = await ReadingList.findOne({ user: userId });
@@ -22,7 +28,7 @@ const addNewManga = async (req, res) => {
         }
 
         // Add manga to reading list with status
-        readingList.mangas.push({ manga: mangaId, status: status });
+        readingList.mangas.push({ manga: mangaId, title, manga_status, statistics, status });
 
         // Save the reading list
         await readingList.save();
@@ -39,6 +45,7 @@ const addNewManga = async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to add manga to reading list', error });
     }
 };
+
 
 
 const getReadingList = async (req, res) => {
